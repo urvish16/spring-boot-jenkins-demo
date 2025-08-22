@@ -1,39 +1,40 @@
 pipeline {
     agent any
-        environment {
+    environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        IMAGE_NAME = 'urvishsoni16/spring-boot-jenkins-demo'
+        IMAGE_NAME = 'urvishsoni16/spring-boot-jenkins-demo' // Updated to your Docker Hub username
         IMAGE_TAG = "${env.BUILD_NUMBER}"
-        }
+    }
     stages {
         stage('Checkout') {
             steps {
-            git 'https://github.com/urvish16/spring-boot-jenkins-demo.git'
+                git 'https://github.com/urvish16/spring-boot-jenkins-demo.git' // Your GitHub username
             }
         }
         stage('Build') {
             steps {
-            sh 'mvn clean package'
+                sh 'mvn clean package'
             }
         }
         stage('Build Docker Image') {
-            steps {sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
         stage('Push to Docker Hub') {
             steps {
-            sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
-            sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
         stage('Deploy Approval') {
             steps {
-            input message: 'Approve deployment to production?', ok: 'Deploy'
+                input message: 'Approve deployment to production?', ok: 'Deploy'
             }
         }
         stage('Deploy') {
             steps {
-            sh "docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
     }
