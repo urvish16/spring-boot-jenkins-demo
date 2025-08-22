@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            git 'https://github.com/urvishsoni16/spring-boot-jenkins-demo.git'
+            git 'https://github.com/urvish16/spring-boot-jenkins-demo.git'
             }
         }
         stage('Build') {
@@ -22,8 +22,7 @@ pipeline {
         }
         stage('Push to Docker Hub') {
             steps {
-            sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u
-            $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
+            sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
             sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
