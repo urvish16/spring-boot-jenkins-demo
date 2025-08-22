@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        IMAGE_NAME = 'your-dockerhub-username/spring-boot-jenkins-demo'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    triggers {
+        pollSCM('H/5 * * * *') // Poll Git every 5 minutes
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+            git 'https://github.com/your-username/spring-boot-jenkins-demo.git'
+            }
+        }
+        stage('Build') {
+            steps {
+            sh 'mvn clean package'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+            sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+            sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u
+            $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
+            sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+        }
+        stage('Deploy') {
+            steps {
+            sh "docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+        }
+    }
+}
